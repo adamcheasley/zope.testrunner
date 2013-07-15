@@ -297,6 +297,13 @@ it and, with the --report-refcounts option to look for memory leaks.
 """)
 
 analysis.add_option(
+    '--rerun', action="store_true", dest='rerun',
+    help="""\
+drops you to a command line to enable reloading of code and rerun
+of given test
+""")
+
+analysis.add_option(
     '--report-refcounts', '-r', action="store_true", dest='report_refcounts',
     help="""\
 After each run of the tests, output a report summarizing changes in

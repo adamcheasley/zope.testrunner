@@ -28,6 +28,9 @@ try:
 except ImportError:
     import unittest
 
+from plone.reload.code import search_modules
+from plone.reload.xreload import Reloader
+
 from six import StringIO
 from zope.testrunner.find import import_name
 from zope.testrunner.find import name_from_layer, _layer_name_cache
@@ -382,6 +385,18 @@ def run_tests(options, tests, name, failures, errors, skipped, import_errors):
     return ran
 
 
+def reload_code():
+    all_modules = search_modules()
+    for path, module in all_modules:
+        path_list = path.split('/')
+        if 'brightside' in path_list and 'src' in path_list:
+            r = Reloader(module)
+            try:
+                module = r.reload()
+            except ImportError:
+                pass
+
+
 def run_layer(options, layer_name, layer, tests, setup_layers,
               failures, errors, skipped, import_errors):
 
@@ -407,8 +422,21 @@ def run_layer(options, layer_name, layer, tests, setup_layers,
         errors.append((SetUpLayerFailure(layer), sys.exc_info()))
         return 0
     else:
-        return run_tests(options, tests, layer_name, failures, errors, skipped,
-                         import_errors)
+        if options.rerun is not None:
+            run_tests(options, tests, layer_name, failures,
+                      errors, skipped, import_errors)
+            while 1:
+                cmdline = raw_input("testing >: ").strip()
+
+                if cmdline == 'quit':
+                    sys.exit(0)
+                if cmdline == 'rerun':
+                    reload_code()
+                    run_tests(options, tests, layer_name, [], errors, skipped,
+                              import_errors)
+        else:
+            return run_tests(options, tests, layer_name,
+                             failures, errors, skipped, import_errors)
 
 
 class SetUpLayerFailure(unittest.TestCase):
@@ -422,7 +450,6 @@ class SetUpLayerFailure(unittest.TestCase):
 
     def __str__(self):
         return "Layer: %s.%s" % (self.layer.__module__, self.layer.__name__)
-
 
 
 def spawn_layer_in_subprocess(result, script_parts, options, features,
