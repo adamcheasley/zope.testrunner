@@ -23,6 +23,7 @@ import sys
 import threading
 import time
 import traceback
+import inspect
 try:
     import unittest2 as unittest
 except ImportError:
@@ -385,11 +386,10 @@ def run_tests(options, tests, name, failures, errors, skipped, import_errors):
     return ran
 
 
-def reload_code():
+def reload_code(test_path):
     all_modules = search_modules()
     for path, module in all_modules:
-        path_list = path.split('/')
-        if 'brightside' in path_list and 'src' in path_list:
+        if path.startswith(test_path):
             r = Reloader(module)
             try:
                 module = r.reload()
@@ -428,10 +428,13 @@ def run_layer(options, layer_name, layer, tests, setup_layers,
             while 1:
                 cmdline = raw_input("testing >: ").strip()
 
-                if cmdline == 'quit':
+                if cmdline in ['quit', 'q']:
                     sys.exit(0)
-                if cmdline == 'rerun':
-                    reload_code()
+                if cmdline in ['rerun', 'rr']:
+                    # find out where the test file lives
+                    test_path = inspect.getfile(tests._tests[0].__class__)
+                    initial_path = '/'.join(test_path.split('/')[:5])
+                    reload_code(initial_path)
                     run_tests(options, tests, layer_name, [], errors, skipped,
                               import_errors)
         else:
