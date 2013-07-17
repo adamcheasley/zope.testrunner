@@ -11,7 +11,7 @@ For example ::
 Known Issues
 =============
 
-* **sqlalchemy** I have had issues with testing methods that
-    use sqlalchemy
+* **sqlalchemy** 
+    I have had issues with testing methods that use sqlalchemy
 
 .. _zope.testrunner: http://docs.zope.org/zope.testrunner/
