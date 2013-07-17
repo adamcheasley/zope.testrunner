@@ -386,15 +386,15 @@ def run_tests(options, tests, name, failures, errors, skipped, import_errors):
     return ran
 
 
-def reload_code(test_path):
+def reload_code(test_path, output):
     all_modules = search_modules()
     for path, module in all_modules:
         if path.startswith(test_path):
             r = Reloader(module)
             try:
                 module = r.reload()
-            except ImportError:
-                pass
+            except:
+                output.info('Could not reload module: %s' % path.split('/')[-1])
 
 
 def run_layer(options, layer_name, layer, tests, setup_layers,
@@ -434,7 +434,7 @@ def run_layer(options, layer_name, layer, tests, setup_layers,
                     # find out where the test file lives
                     test_path = inspect.getfile(tests._tests[0].__class__)
                     initial_path = '/'.join(test_path.split('/')[:5])
-                    reload_code(initial_path)
+                    reload_code(initial_path, output)
                     run_tests(options, tests, layer_name, [], errors, skipped,
                               import_errors)
         else:
