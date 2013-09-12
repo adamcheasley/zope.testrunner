@@ -6,6 +6,9 @@ having to load all other layers each time.
 For example ::
 
     bin/test -s my.egg -t test_bar --rerun
+    
+    
+Requires zc.recipe.testrunner = 2.0.0
 
 
 Known Issues
